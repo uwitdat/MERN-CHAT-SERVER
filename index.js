@@ -1,4 +1,8 @@
-const app = require('express')();
+const express = require('express')
+const app = express();
+const authRoutes = require('./routes/authRoute')
+app.use(express.json())
+app.use(authRoutes)
 const http = require('http').createServer(app)
 const mongoose = require('mongoose')
 const socketio = require('socket.io')
@@ -18,11 +22,14 @@ mongoose.connect(mongoDB, { useUnifiedTopology: true, useNewUrlParser: true, }
 const { addUser, getUser, removeUser } = require('./helper')
 
 io.on('connection', (socket) => {
-    console.log(socket.id)
     Room.find().then(result => {
         socket.emit('output-rooms', result)
 
     })
+    Message.find().then(result => {
+        socket.emit('output-message', result)
+    })
+
     socket.on('create-room', name => {
 
         const room = new Room({
